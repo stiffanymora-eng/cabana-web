@@ -4,21 +4,28 @@ import psycopg2
 
 app = Flask(__name__)
 
-# 🔗 conexión a PostgreSQL desde Render
-DATABASE_URL = os.environ.get("DATABASE_URL")
-
-def get_db_connection():
-    conn = psycopg2.connect(DATABASE_URL)
-    return conn
-
 NUMERO_WHATSAPP = "50689872394"
 
+# 🔗 Obtener URL de la base de datos
+DATABASE_URL = os.environ.get("DATABASE_URL")
 
+# 🔧 Arreglar URL si viene como postgres://
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
+# 🔌 Conexión segura
+def get_db_connection():
+    conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+    return conn
+
+
+# 🏠 Inicio
 @app.route("/")
 def home():
     return render_template("index.html")
 
 
+# 📅 Reserva
 @app.route("/reserva", methods=["GET", "POST"])
 def reserva():
     mensaje = ""
@@ -41,7 +48,7 @@ def reserva():
         nombre = request.form["nombre"]
         fecha = request.form["fecha"]
 
-        # Guardar en BD
+        # Guardar reserva
         cur.execute(
             "INSERT INTO reservas (nombre, fecha) VALUES (%s, %s)",
             (nombre, fecha)
@@ -62,5 +69,21 @@ def reserva():
     )
 
 
+# 👀 Admin (ver reservas)
+@app.route("/admin")
+def admin():
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    cur.execute("SELECT nombre, fecha FROM reservas ORDER BY fecha")
+    reservas = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return render_template("admin.html", reservas=reservas)
+
+
+# 🚀 Render
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
