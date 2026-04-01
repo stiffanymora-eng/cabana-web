@@ -3,56 +3,97 @@ def reserva():
     if request.method == 'POST':
         nombre = request.form['nombre']
         fecha = request.form['fecha']
-
-        try:
-            conn = get_db_connection()
-            cur = conn.cursor()
-
-            cur.execute("""
-                CREATE TABLE IF NOT EXISTS reservas (
-                    id SERIAL PRIMARY KEY,
-                    nombre TEXT,
-                    fecha DATE
-                )
-            """)
-
-            cur.execute(
-                "INSERT INTO reservas (nombre, fecha) VALUES (%s, %s)",
-                (nombre, fecha)
-            )
-
-            conn.commit()
-            cur.close()
-            conn.close()
-
-            return f"""
-            <h2 style='color:green;'>✅ Reserva guardada</h2>
-            <a href='/reserva'>Hacer otra reserva</a><br><br>
-
-            <a href='https://wa.me/506XXXXXXXX?text=Hola,%20hice%20una%20reserva%20a%20nombre%20de%20{nombre}%20para%20el%20{fecha}'
-               style='background:#25D366;color:white;padding:10px 20px;text-decoration:none;border-radius:8px;'>
-               📲 Confirmar por WhatsApp
-            </a>
-            """
-
-        except Exception as e:
-            return f"ERROR: {e}"
+        return redirect('/confirmado')
 
     return """
     <html>
     <head>
-        <title>Reservar</title>
-    </head>
-    <body style="font-family:Arial;text-align:center;background:#f4f4f4;">
-        <h1>🏡 Reserva tu Cabaña</h1>
+        <title>Reservar - Cabaña ME</title>
 
-        <form method="POST" style="background:white;padding:20px;border-radius:10px;display:inline-block;">
-            <input name="nombre" placeholder="Tu nombre" required style="padding:10px;"><br><br>
-            <input name="fecha" type="date" required style="padding:10px;"><br><br>
-            <button type="submit" style="padding:10px 20px;background:#007BFF;color:white;border:none;border-radius:5px;">
-                Reservar
-            </button>
-        </form>
+        <style>
+            body {
+                margin:0;
+                font-family:'Segoe UI', sans-serif;
+                background:#0f172a;
+                color:white;
+            }
+
+            .container {
+                display:flex;
+                justify-content:center;
+                align-items:center;
+                height:100vh;
+                flex-direction:column;
+                text-align:center;
+            }
+
+            .card {
+                background:#1e293b;
+                padding:40px;
+                border-radius:20px;
+                width:320px;
+                box-shadow:0 0 20px rgba(0,0,0,0.4);
+            }
+
+            h1 {
+                margin-bottom:20px;
+            }
+
+            input {
+                width:100%;
+                padding:12px;
+                margin:10px 0;
+                border:none;
+                border-radius:10px;
+                font-size:15px;
+            }
+
+            button {
+                width:100%;
+                padding:12px;
+                margin-top:15px;
+                background:#22c55e;
+                border:none;
+                border-radius:10px;
+                color:white;
+                font-size:16px;
+                cursor:pointer;
+                transition:0.3s;
+            }
+
+            button:hover {
+                background:#16a34a;
+            }
+
+            .back {
+                margin-top:20px;
+                display:inline-block;
+                color:#60a5fa;
+                text-decoration:none;
+            }
+
+        </style>
+    </head>
+
+    <body>
+
+        <div class="container">
+            <div class="card">
+
+                <h1>📅 Reservar</h1>
+
+                <form method="POST">
+                    <input type="text" name="nombre" placeholder="Tu nombre" required>
+                    <input type="date" name="fecha" required>
+
+                    <button type="submit">Reservar ahora</button>
+                </form>
+
+                <a href="/" class="back">← Volver</a>
+
+            </div>
+        </div>
+
     </body>
     </html>
     """
