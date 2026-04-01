@@ -1,10 +1,145 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Cabaña</title>
-</head>
-<body>
-    <h1>Bienvenido a la Cabaña</h1>
-    <a href="/reserva">Hacer Reserva</a>
-</body>
-</html>
+@app.route('/')
+def index():
+    return """
+    <html>
+    <head>
+        <title>Cabaña ME</title>
+        <style>
+            body {
+                margin:0;
+                font-family: 'Segoe UI', sans-serif;
+                background:#0f172a;
+                color:white;
+            }
+
+            .hero {
+                height:100vh;
+                background:
+                    linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)),
+                    url('https://images.unsplash.com/photo-1505691938895-1758d7feb511');
+                background-size:cover;
+                background-position:center;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                flex-direction:column;
+                text-align:center;
+            }
+
+            .hero h1 {
+                font-size:60px;
+                margin:0;
+            }
+
+            .hero p {
+                font-size:20px;
+                opacity:0.9;
+            }
+
+            .btn {
+                background:#22c55e;
+                padding:15px 35px;
+                border-radius:12px;
+                color:white;
+                text-decoration:none;
+                margin-top:25px;
+                font-size:18px;
+                transition:0.3s;
+            }
+
+            .btn:hover {
+                background:#16a34a;
+                transform:scale(1.05);
+            }
+
+            .section {
+                padding:60px 20px;
+                text-align:center;
+            }
+
+            .cards {
+                display:flex;
+                justify-content:center;
+                flex-wrap:wrap;
+            }
+
+            .card {
+                background:#1e293b;
+                padding:25px;
+                margin:10px;
+                border-radius:15px;
+                width:250px;
+                transition:0.3s;
+            }
+
+            .card:hover {
+                transform:translateY(-5px);
+                background:#334155;
+            }
+
+            .card h3 {
+                margin-top:10px;
+            }
+
+            .footer {
+                background:#020617;
+                padding:20px;
+                text-align:center;
+                opacity:0.7;
+            }
+
+            .whatsapp {
+                position:fixed;
+                bottom:20px;
+                right:20px;
+                background:#25D366;
+                padding:15px;
+                border-radius:50%;
+                font-size:25px;
+                text-decoration:none;
+                color:white;
+                box-shadow:0 0 15px rgba(0,0,0,0.5);
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <div class="hero">
+            <h1>🏡 Cabaña ME</h1>
+            <p>Escápate a la naturaleza y vive una experiencia única</p>
+
+            <a href="/reserva" class="btn">Reservar ahora</a>
+        </div>
+
+        <div class="section">
+            <h2>🌲 Lo que ofrecemos</h2>
+
+            <div class="cards">
+                <div class="card">
+                    <h3>🔥 Fogata</h3>
+                    <p>Noches inolvidables bajo las estrellas</p>
+                </div>
+
+                <div class="card">
+                    <h3>🌄 Vista increíble</h3>
+                    <p>Despierta con paisajes naturales</p>
+                </div>
+
+                <div class="card">
+                    <h3>🛏️ Comodidad total</h3>
+                    <p>Todo lo que necesitas para relajarte</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            © 2026 Cabaña ME - Todos los derechos reservados
+        </div>
+
+        <!-- WhatsApp flotante -->
+        <a class="whatsapp" href="https://wa.me/50689872394">📲</a>
+
+    </body>
+    </html>
+    """
