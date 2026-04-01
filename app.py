@@ -1,59 +1,59 @@
 from flask import Flask, render_template, request
-import psycopg2
 import os
+import psycopg2
 
 app = Flask(__name__)
 
-NUMERO_WHATSAPP = "50689872394"
-
-# 🔗 Conexión a la base de datos
+# 🔗 conexión a PostgreSQL desde Render
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
 def get_db_connection():
-    return psycopg2.connect(DATABASE_URL)
+    conn = psycopg2.connect(DATABASE_URL)
+    return conn
+
+NUMERO_WHATSAPP = "50689872394"
 
 
-# 🏠 Inicio
 @app.route("/")
 def home():
     return render_template("index.html")
 
 
-# 📅 Reserva
 @app.route("/reserva", methods=["GET", "POST"])
 def reserva():
     mensaje = ""
     link_whatsapp = ""
 
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Crear tabla si no existe
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS reservas (
+            id SERIAL PRIMARY KEY,
+            nombre TEXT,
+            fecha TEXT
+        )
+    """)
+    conn.commit()
+
     if request.method == "POST":
         nombre = request.form["nombre"]
         fecha = request.form["fecha"]
 
-        conn = get_db_connection()
-        cur = conn.cursor()
-
-        # Crear tabla si no existe
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS reservas (
-                id SERIAL PRIMARY KEY,
-                nombre TEXT,
-                fecha DATE
-            )
-        """)
-
-        # Guardar reserva
+        # Guardar en BD
         cur.execute(
             "INSERT INTO reservas (nombre, fecha) VALUES (%s, %s)",
             (nombre, fecha)
         )
-
         conn.commit()
-        cur.close()
-        conn.close()
 
         mensaje = "Reserva guardada correctamente"
 
         link_whatsapp = f"https://wa.me/{NUMERO_WHATSAPP}?text=Hola soy {nombre} y quiero confirmar mi reserva para {fecha}"
+
+    cur.close()
+    conn.close()
 
     return render_template(
         "reserva.html",
@@ -62,21 +62,5 @@ def reserva():
     )
 
 
-# 🛠️ Admin
-@app.route("/admin")
-def admin():
-    conn = get_db_connection()
-    cur = conn.cursor()
-
-    cur.execute("SELECT nombre, fecha FROM reservas ORDER BY fecha")
-    reservas = cur.fetchall()
-
-    cur.close()
-    conn.close()
-
-    return render_template("admin.html", reservas=reservas)
-
-
-# ⚠️ Render
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
+    app.run(host="0.0.0.0", port=10000)
