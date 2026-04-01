@@ -2,93 +2,25 @@
 <html>
 <head>
     <title>Reserva</title>
-
-    <!-- Calendario Flatpickr -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
-    <style>
-        body {
-            font-family: Arial;
-            background: #f0f0f0;
-            text-align: center;
-        }
-
-        .card {
-            background: white;
-            padding: 30px;
-            margin: 50px auto;
-            width: 320px;
-            border-radius: 15px;
-            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
-        }
-
-        input, button {
-            padding: 10px;
-            width: 90%;
-            margin: 10px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
-
-        button {
-            background: #3498db;
-            color: white;
-            border: none;
-        }
-
-        button:hover {
-            background: #2980b9;
-        }
-
-        .mensaje {
-            color: red;
-        }
-    </style>
 </head>
-
 <body>
-
-<div class="card">
-    <h2>Reservar Cabaña</h2>
+    <h1>Reservar</h1>
 
     <form method="POST">
         <input type="text" name="nombre" placeholder="Tu nombre" required>
-
-        <!-- Calendario -->
-        <input type="text" id="fecha" name="fecha" placeholder="Selecciona una fecha" required>
-
+        <input type="date" name="fecha" required>
         <button type="submit">Reservar</button>
     </form>
 
-    <p class="mensaje">{{ mensaje }}</p>
+    <p>{{ mensaje }}</p>
 
     {% if link_whatsapp %}
         <a href="{{ link_whatsapp }}" target="_blank">
-            <button>Confirmar por WhatsApp</button>
+            Confirmar por WhatsApp
         </a>
     {% endif %}
-</div>
 
-<!-- SCRIPT DEL CALENDARIO -->
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    flatpickr("#fecha", {
-        dateFormat: "Y-m-d",
-        disable: {{ fechas | tojson }},
-
-        onDayCreate: function(dObj, dStr, fp, dayElem) {
-            let fecha = dayElem.dateObj.toISOString().split("T")[0];
-            let fechasOcupadas = {{ fechas | tojson }};
-
-            if (fechasOcupadas.includes(fecha)) {
-                dayElem.style.background = "#ff4d4d";
-                dayElem.style.color = "white";
-            }
-        }
-    });
-});
-</script>
-
+    <br><br>
+    <a href="/">Volver</a>
 </body>
 </html>
