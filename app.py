@@ -1,6 +1,5 @@
 from flask import Flask, request
 import psycopg2
-import os
 
 app = Flask(__name__)
 
@@ -32,6 +31,7 @@ def index():
                 align-items:center;
                 justify-content:center;
                 flex-direction:column;
+                text-align:center;
             }
 
             .hero h1 {
@@ -127,25 +127,109 @@ def reserva():
             conn.close()
 
             return """
-            <h2 style='color:green;'>✅ Reserva confirmada</h2>
-            <a href="/">Volver</a><br><br>
-            <a href="https://wa.me/50689872394">Confirmar por WhatsApp</a>
+            <html>
+            <head>
+                <title>Confirmado</title>
+                <style>
+                    body {
+                        font-family: Arial;
+                        background:#0f172a;
+                        color:white;
+                        text-align:center;
+                        padding-top:100px;
+                    }
+
+                    .card {
+                        background:#1e293b;
+                        padding:40px;
+                        border-radius:20px;
+                        display:inline-block;
+                    }
+
+                    h1 {
+                        color:#22c55e;
+                    }
+
+                    .btn {
+                        display:block;
+                        margin:15px;
+                        padding:15px;
+                        border-radius:10px;
+                        text-decoration:none;
+                        color:white;
+                    }
+
+                    .whatsapp {
+                        background:#25D366;
+                    }
+
+                    .volver {
+                        background:#3b82f6;
+                    }
+                </style>
+            </head>
+
+            <body>
+
+                <div class="card">
+                    <h1>✅ Reserva confirmada</h1>
+
+                    <a class="btn volver" href="/">⬅ Volver</a>
+
+                    <a class="btn whatsapp" href="https://wa.me/50689872394">
+                        📲 Confirmar por WhatsApp
+                    </a>
+                </div>
+
+            </body>
+            </html>
             """
 
         except Exception as e:
             return f"Error: {e}"
 
     return """
-    <h1>Reservar</h1>
-    <form method="POST">
-        <input name="nombre" placeholder="Tu nombre"><br><br>
-        <input type="date" name="fecha"><br><br>
-        <button>Reservar</button>
-    </form>
+    <html>
+    <head>
+        <style>
+            body {
+                font-family: Arial;
+                background:#0f172a;
+                color:white;
+                text-align:center;
+                padding-top:100px;
+            }
+
+            input, button {
+                padding:10px;
+                margin:10px;
+                border-radius:8px;
+                border:none;
+            }
+
+            button {
+                background:#22c55e;
+                color:white;
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <h1>Reservar</h1>
+
+        <form method="POST">
+            <input name="nombre" placeholder="Tu nombre"><br>
+            <input type="date" name="fecha"><br>
+            <button>Reservar</button>
+        </form>
+
+    </body>
+    </html>
     """
 
 
-# 📊 VER RESERVAS
+# 📊 ADMIN
 @app.route('/admin')
 def admin():
     conn = get_db()
