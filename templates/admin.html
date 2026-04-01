@@ -9,6 +9,8 @@
     <ul>
         {% for r in reservas %}
             <li>{{ r[0] }} - {{ r[1] }}</li>
+        {% else %}
+            <li>No hay reservas</li>
         {% endfor %}
     </ul>
 
