@@ -8,12 +8,10 @@
     <h1>📊 Reservas</h1>
 
     <ul>
-        {% for reserva in reservas %}
+        {% for id, nombre, fecha in reservas %}
             <li>
-                {{ reserva }}
-                <a href="/eliminar/{{ loop.index0 }}">
-                    ❌ Eliminar
-                </a>
+                {{ nombre }} - {{ fecha }}
+                <a href="/eliminar/{{ id }}">❌ Eliminar</a>
             </li>
         {% endfor %}
     </ul>
