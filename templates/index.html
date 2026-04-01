@@ -2,15 +2,52 @@
 <html>
 <head>
     <title>CabañaME</title>
-</head>
-<body style="text-align:center; font-family:Arial;">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial;
+            background: #f5f5f5;
+            text-align: center;
+        }
 
-    <h1>🌲 Bienvenido a CabañaME</h1>
+        .hero {
+            background: url("https://images.unsplash.com/photo-1505691938895-1758d7feb511") no-repeat center;
+            background-size: cover;
+            height: 300px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .boton {
+            padding: 15px 25px;
+            margin: 20px;
+            font-size: 18px;
+            border: none;
+            border-radius: 10px;
+            background: #2ecc71;
+            color: white;
+            cursor: pointer;
+        }
+
+        .boton:hover {
+            background: #27ae60;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="hero">
+        🌲 CabañaME - Escápate a la naturaleza
+    </div>
+
+    <h2>Reserva tu experiencia</h2>
 
     <a href="/reserva">
-        <button style="padding:10px 20px; font-size:16px;">
-            Reservar
-        </button>
+        <button class="boton">Reservar ahora</button>
     </a>
 
 </body>
