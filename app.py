@@ -17,22 +17,37 @@ def index():
     <head>
         <title>Cabaña ME</title>
     </head>
-    <body style="font-family:Arial;margin:0;background:linear-gradient(to right,#4facfe,#00f2fe);color:white;text-align:center;">
+    <body style="
+        margin:0;
+        font-family:Arial;
+        background:url('https://images.unsplash.com/photo-1505693416388-ac5ce068fe85') no-repeat center/cover;
+        color:white;
+        text-align:center;
+    ">
 
-        <div style="padding:80px;">
-            <h1 style="font-size:50px;">🏡 Cabaña ME</h1>
-            <p style="font-size:20px;">Disfruta una experiencia única</p>
+    <div style="background:rgba(0,0,0,0.6);height:100vh;padding-top:100px;">
 
-            <a href="/reserva" style="background:white;color:#007BFF;padding:15px 30px;border-radius:10px;text-decoration:none;font-size:18px;">
-                Reservar ahora
-            </a>
+        <h1 style="font-size:60px;">🏡 Cabaña ME</h1>
+        <p style="font-size:22px;">Escápate a la naturaleza</p>
 
-            <br><br>
+        <a href="/reserva" style="
+            background:#25D366;
+            padding:15px 30px;
+            border-radius:10px;
+            color:white;
+            text-decoration:none;
+            font-size:20px;
+        ">
+            Reservar ahora
+        </a>
 
-            <a href="/ver-reservas" style="color:white;font-size:18px;">
-                📅 Ver reservas
-            </a>
-        </div>
+        <br><br>
+
+        <a href="/ver-reservas" style="color:white;font-size:18px;">
+            📅 Ver reservas
+        </a>
+
+    </div>
 
     </body>
     </html>
@@ -57,21 +72,17 @@ def reserva():
                 )
             """)
 
-            # 🔴 Verificar si la fecha ya está ocupada
             cur.execute("SELECT * FROM reservas WHERE fecha = %s", (fecha,))
-            existente = cur.fetchone()
-
-            if existente:
+            if cur.fetchone():
                 return """
                 <html>
-                <body style="font-family:Arial;text-align:center;background:#f4f4f4;">
+                <body style="font-family:Arial;text-align:center;background:#111;color:white;padding-top:50px;">
                     <h2 style='color:red;'>❌ Fecha ya reservada</h2>
-                    <a href='/reserva'>Intentar otra fecha</a>
+                    <a href='/reserva' style='color:#25D366;'>Intentar otra fecha</a>
                 </body>
                 </html>
                 """
 
-            # ✅ Guardar reserva
             cur.execute(
                 "INSERT INTO reservas (nombre, fecha) VALUES (%s, %s)",
                 (nombre, fecha)
@@ -83,11 +94,11 @@ def reserva():
 
             return f"""
             <html>
-            <body style="font-family:Arial;text-align:center;background:#f4f4f4;padding-top:50px;">
+            <body style="font-family:Arial;text-align:center;background:#111;color:white;padding-top:50px;">
 
-                <h2 style='color:green;'>✅ Reserva confirmada</h2>
+                <h2 style='color:#25D366;'>✅ Reserva confirmada</h2>
 
-                <a href='/reserva'>Nueva reserva</a><br><br>
+                <a href='/reserva' style='color:white;'>Nueva reserva</a><br><br>
 
                 <a href='https://wa.me/50689872394?text=Hola,%20reserva%20confirmada%20a%20nombre%20de%20{nombre}%20para%20el%20{fecha}'
                    style='background:#25D366;color:white;padding:15px 30px;border-radius:10px;text-decoration:none;font-size:18px;'>
@@ -103,31 +114,34 @@ def reserva():
 
     return """
     <html>
-    <head>
-        <title>Reservar - Cabaña ME</title>
-    </head>
-    <body style="font-family:Arial;background:#f4f4f4;text-align:center;">
+    <body style="
+        margin:0;
+        font-family:Arial;
+        background:#111;
+        color:white;
+        text-align:center;
+    ">
 
-        <h1>🏡 Reserva en Cabaña ME</h1>
+    <h1 style="padding-top:30px;">🏡 Reserva en Cabaña ME</h1>
 
-        <form method="POST" style="
-            background:white;
-            padding:30px;
-            border-radius:15px;
-            display:inline-block;
-            box-shadow:0 0 20px rgba(0,0,0,0.1);
-        ">
-            <input name="nombre" placeholder="Tu nombre" required
-                style="padding:10px;width:220px;"><br><br>
+    <form method="POST" style="
+        background:#222;
+        padding:30px;
+        border-radius:15px;
+        display:inline-block;
+        box-shadow:0 0 20px rgba(0,0,0,0.5);
+    ">
+        <input name="nombre" placeholder="Tu nombre" required
+            style="padding:10px;width:220px;"><br><br>
 
-            <input name="fecha" type="date" required
-                style="padding:10px;width:220px;"><br><br>
+        <input name="fecha" type="date" required
+            style="padding:10px;width:220px;"><br><br>
 
-            <button type="submit"
-                style="padding:12px 25px;background:#007BFF;color:white;border:none;border-radius:8px;font-size:16px;">
-                Reservar
-            </button>
-        </form>
+        <button type="submit"
+            style="padding:12px 25px;background:#25D366;color:white;border:none;border-radius:8px;">
+            Reservar
+        </button>
+    </form>
 
     </body>
     </html>
@@ -148,7 +162,7 @@ def ver_reservas():
     lista = ""
     for r in reservas:
         lista += f"""
-        <div style='background:white;padding:15px;margin:10px;border-radius:10px;box-shadow:0 0 10px rgba(0,0,0,0.1);'>
+        <div style='background:#222;padding:15px;margin:10px;border-radius:10px;color:white;'>
             <b>{r[0]}</b><br>
             📅 {r[1]}
         </div>
@@ -156,17 +170,14 @@ def ver_reservas():
 
     return f"""
     <html>
-    <head>
-        <title>Reservas - Cabaña ME</title>
-    </head>
-    <body style="font-family:Arial;background:#f4f4f4;text-align:center;">
+    <body style="background:#111;font-family:Arial;text-align:center;color:white;">
 
         <h1>📅 Reservas</h1>
 
         {lista if lista else "<p>No hay reservas aún</p>"}
 
         <br>
-        <a href="/" style="text-decoration:none;color:#007BFF;">⬅ Volver</a>
+        <a href="/" style="color:#25D366;">⬅ Volver</a>
 
     </body>
     </html>
