@@ -2,79 +2,32 @@
 <html>
 <head>
     <title>Reserva</title>
-    <style>
-        body {
-            font-family: Arial;
-            background: #f5f5f5;
-            text-align: center;
-        }
-        .card {
-            background: white;
-            padding: 30px;
-            margin: 100px auto;
-            width: 300px;
-            border-radius: 10px;
-            box-shadow: 0px 0px 10px gray;
-        }
-        input, button {
-            padding: 10px;
-            margin: 10px;
-            width: 80%;
-        }
-        button {
-            background: #ff385c;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-        .mensaje {
-            margin: 10px;
-            padding: 10px;
-            background: #d4edda;
-            color: green;
-            border-radius: 5px;
-        }
-        .error {
-            background: #f8d7da;
-            color: red;
-        }
-        .whatsapp {
-            background: green;
-            color: white;
-        }
-    </style>
 </head>
-<body>
+<body style="text-align:center; font-family:Arial;">
 
-<div class="card">
-    <h2>Reserva en CabañaME 🏡</h2>
-
-    {% if mensaje %}
-        <div class="mensaje {% if '❌' in mensaje %}error{% endif %}">
-            {{ mensaje }}
-        </div>
-    {% endif %}
+    <h1>Reservar Cabaña</h1>
 
     <form method="POST">
-        <input type="text" name="nombre" placeholder="Tu nombre" required><br>
-        <input type="date" name="fecha" required><br>
+        <input type="text" name="nombre" placeholder="Tu nombre" required><br><br>
+        <input type="date" name="fecha" required><br><br>
+
         <button type="submit">Reservar</button>
     </form>
 
+    <h3 style="color:red;">{{ mensaje }}</h3>
+
     {% if link_whatsapp %}
         <a href="{{ link_whatsapp }}" target="_blank">
-            <button class="whatsapp">📱 Confirmar por WhatsApp</button>
+            <button>Confirmar por WhatsApp</button>
         </a>
     {% endif %}
 
-    <h3>📅 Fechas ocupadas:</h3>
+    <h2>Fechas ocupadas:</h2>
     <ul>
-        {% for f in fechas %}
-            <li>{{ f }}</li>
+        {% for fecha in fechas %}
+            <li>{{ fecha }}</li>
         {% endfor %}
     </ul>
-
-</div>
 
 </body>
 </html>
