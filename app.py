@@ -35,7 +35,6 @@ def reserva():
 
             mensaje = "Reserva guardada correctamente"
 
-            # Link de WhatsApp
             link_whatsapp = f"https://wa.me/{NUMERO_WHATSAPP}?text=Hola soy {nombre} y quiero confirmar mi reserva para {fecha}"
 
     return render_template(
@@ -45,7 +44,5 @@ def reserva():
         link_whatsapp=link_whatsapp
     )
 
-
-# ⚠️ IMPORTANTE PARA RENDER
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
+    app.run(debug=True)
