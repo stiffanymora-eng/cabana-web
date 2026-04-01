@@ -1,30 +1,58 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Reservar</title>
-</head>
-<body>
-    <h1>Reservar</h1>
+@app.route('/reserva', methods=['GET', 'POST'])
+def reserva():
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        fecha = request.form['fecha']
 
-    <form method="POST">
-        <input type="text" name="nombre" placeholder="Tu nombre" required>
-        <br><br>
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
 
-        <input type="date" name="fecha" required>
-        <br><br>
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS reservas (
+                    id SERIAL PRIMARY KEY,
+                    nombre TEXT,
+                    fecha DATE
+                )
+            """)
 
-        <button type="submit">Reservar</button>
-    </form>
+            cur.execute(
+                "INSERT INTO reservas (nombre, fecha) VALUES (%s, %s)",
+                (nombre, fecha)
+            )
 
-    <p style="color:green;">{{ mensaje }}</p>
+            conn.commit()
+            cur.close()
+            conn.close()
 
-    {% if link_whatsapp %}
-        <a href="{{ link_whatsapp }}" target="_blank">
-            Confirmar por WhatsApp
-        </a>
-    {% endif %}
+            return f"""
+            <h2 style='color:green;'>✅ Reserva guardada</h2>
+            <a href='/reserva'>Hacer otra reserva</a><br><br>
 
-    <br><br>
-    <a href="/">Volver</a>
-</body>
-</html>
+            <a href='https://wa.me/506XXXXXXXX?text=Hola,%20hice%20una%20reserva%20a%20nombre%20de%20{nombre}%20para%20el%20{fecha}'
+               style='background:#25D366;color:white;padding:10px 20px;text-decoration:none;border-radius:8px;'>
+               📲 Confirmar por WhatsApp
+            </a>
+            """
+
+        except Exception as e:
+            return f"ERROR: {e}"
+
+    return """
+    <html>
+    <head>
+        <title>Reservar</title>
+    </head>
+    <body style="font-family:Arial;text-align:center;background:#f4f4f4;">
+        <h1>🏡 Reserva tu Cabaña</h1>
+
+        <form method="POST" style="background:white;padding:20px;border-radius:10px;display:inline-block;">
+            <input name="nombre" placeholder="Tu nombre" required style="padding:10px;"><br><br>
+            <input name="fecha" type="date" required style="padding:10px;"><br><br>
+            <button type="submit" style="padding:10px 20px;background:#007BFF;color:white;border:none;border-radius:5px;">
+                Reservar
+            </button>
+        </form>
+    </body>
+    </html>
+    """
