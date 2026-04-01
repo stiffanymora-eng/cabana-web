@@ -2,6 +2,11 @@
 <html>
 <head>
     <title>Reserva</title>
+
+    <!-- Flatpickr (calendario bonito) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
     <style>
         body {
             font-family: Arial;
@@ -41,33 +46,36 @@
         }
     </style>
 </head>
+
 <body>
 
-    <div class="card">
-        <h2>Reservar Cabaña</h2>
+<div class="card">
+    <h2>Reservar Cabaña</h2>
 
-        <form method="POST">
-            <input type="text" name="nombre" placeholder="Tu nombre" required>
-            <input type="date" name="fecha" required>
+    <form method="POST">
+        <input type="text" name="nombre" placeholder="Tu nombre" required>
 
-            <button type="submit">Reservar</button>
-        </form>
+        <!-- Calendario -->
+        <input type="text" id="fecha" name="fecha" placeholder="Selecciona una fecha" required>
 
-        <p class="mensaje">{{ mensaje }}</p>
+        <button type="submit">Reservar</button>
+    </form>
 
-        {% if link_whatsapp %}
-            <a href="{{ link_whatsapp }}" target="_blank">
-                <button>Confirmar por WhatsApp</button>
-            </a>
-        {% endif %}
-    </div>
+    <p class="mensaje">{{ mensaje }}</p>
 
-    <h3>📅 Fechas ocupadas</h3>
-    <ul>
-        {% for fecha in fechas %}
-            <li>{{ fecha }}</li>
-        {% endfor %}
-    </ul>
+    {% if link_whatsapp %}
+        <a href="{{ link_whatsapp }}" target="_blank">
+            <button>Confirmar por WhatsApp</button>
+        </a>
+    {% endif %}
+</div>
+
+<script>
+    flatpickr("#fecha", {
+        dateFormat: "Y-m-d",
+        disable: {{ fechas | tojson }}
+    });
+</script>
 
 </body>
 </html>
