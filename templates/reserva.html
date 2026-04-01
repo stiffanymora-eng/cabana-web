@@ -55,7 +55,7 @@
     <form method="POST">
         <input type="text" name="nombre" placeholder="Tu nombre" required>
 
-        <!-- INPUT DEL CALENDARIO -->
+        <!-- Calendario -->
         <input type="text" id="fecha" name="fecha" placeholder="Selecciona una fecha" required>
 
         <button type="submit">Reservar</button>
@@ -70,14 +70,7 @@
     {% endif %}
 </div>
 
-<h3>📅 Fechas ocupadas</h3>
-<ul>
-    {% for fecha in fechas %}
-        <li>{{ fecha }}</li>
-    {% endfor %}
-</ul>
-
-<!-- SCRIPT CORREGIDO -->
+<!-- SCRIPT DEL CALENDARIO -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     flatpickr("#fecha", {
