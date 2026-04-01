@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Panel Admin</title>
+</head>
+<body style="font-family:Arial; text-align:center;">
+
+    <h1>📊 Reservas</h1>
+
+    <ul>
+        {% for reserva in reservas %}
+            <li>
+                {{ reserva }}
+                <a href="/eliminar/{{ loop.index0 }}">
+                    ❌ Eliminar
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+
+</body>
+</html>
