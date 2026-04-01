@@ -71,10 +71,23 @@
 </div>
 
 <script>
+    <script>
     flatpickr("#fecha", {
         dateFormat: "Y-m-d",
-        disable: {{ fechas | tojson }}
+        disable: {{ fechas | tojson }},
+        onDayCreate: function(dObj, dStr, fp, dayElem) {
+            let fecha = dayElem.dateObj.toISOString().split("T")[0];
+
+            let fechasOcupadas = {{ fechas | tojson }};
+
+            if (fechasOcupadas.includes(fecha)) {
+                dayElem.style.background = "#ff4d4d";
+                dayElem.style.color = "white";
+            }
+        }
     });
+</script>
+
 </script>
 
 </body>
