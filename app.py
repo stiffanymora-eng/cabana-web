@@ -1,34 +1,105 @@
-from flask import Flask, request, redirect, session
+from flask import Flask, request
 import psycopg2
 import os
 
 app = Flask(__name__)
-app.secret_key = "secreto123"  # 🔐 clave para login
 
-DATABASE_URL = os.getenv("DATABASE_URL").strip()
+DATABASE_URL = "postgresql://cabana_db_bslw_user:OWImMBfuedmMJjci4jqkdEwLEEAECAP2@dpg-d76a6nmslomc738ep61g-a.oregon-postgres.render.com/cabana_db_bslw"
 
-def get_db_connection():
+def get_db():
     return psycopg2.connect(DATABASE_URL, sslmode='require')
+
 
 # 🏠 HOME
 @app.route('/')
 def index():
     return """
     <html>
-    <body style="margin:0;font-family:Arial;background:#111;color:white;text-align:center;">
-        <h1 style="padding-top:50px;">🏡 Cabaña ME</h1>
-        <p>Escápate a la naturaleza</p>
+    <head>
+        <title>Cabaña ME</title>
+        <style>
+            body {
+                margin:0;
+                font-family: Arial;
+                background:#0f172a;
+                color:white;
+            }
 
-        <a href="/reserva" style="background:#25D366;padding:15px 30px;border-radius:10px;color:white;text-decoration:none;">
-            Reservar ahora
-        </a>
+            .hero {
+                height:90vh;
+                background:url('https://images.unsplash.com/photo-1505691938895-1758d7feb511') center/cover;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                flex-direction:column;
+            }
 
-        <br><br>
+            .hero h1 {
+                font-size:60px;
+                margin:0;
+            }
 
-        <a href="/login" style="color:#25D366;">🔐 Admin</a>
+            .btn {
+                background:#25D366;
+                padding:15px 30px;
+                border-radius:10px;
+                color:white;
+                text-decoration:none;
+                margin-top:20px;
+                font-size:18px;
+            }
+
+            .section {
+                padding:40px;
+                text-align:center;
+            }
+
+            .card {
+                background:#1e293b;
+                padding:20px;
+                margin:10px;
+                border-radius:15px;
+                display:inline-block;
+                width:250px;
+            }
+
+            .whatsapp {
+                position:fixed;
+                bottom:20px;
+                right:20px;
+                background:#25D366;
+                padding:15px;
+                border-radius:50%;
+                font-size:25px;
+                text-decoration:none;
+                color:white;
+            }
+        </style>
+    </head>
+
+    <body>
+
+        <div class="hero">
+            <h1>🏡 Cabaña ME</h1>
+            <p>Escápate a la naturaleza</p>
+
+            <a href="/reserva" class="btn">Reservar ahora</a>
+        </div>
+
+        <div class="section">
+            <h2>🌲 Experiencia</h2>
+
+            <div class="card">🔥 Fogata</div>
+            <div class="card">🌄 Vista increíble</div>
+            <div class="card">🛏️ Comodidad total</div>
+        </div>
+
+        <a class="whatsapp" href="https://wa.me/50689872394">📲</a>
+
     </body>
     </html>
     """
+
 
 # 📅 RESERVA
 @app.route('/reserva', methods=['GET', 'POST'])
@@ -37,141 +108,62 @@ def reserva():
         nombre = request.form['nombre']
         fecha = request.form['fecha']
 
-        conn = get_db_connection()
-        cur = conn.cursor()
+        try:
+            conn = get_db()
+            cur = conn.cursor()
 
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS reservas (
-                id SERIAL PRIMARY KEY,
-                nombre TEXT,
-                fecha DATE UNIQUE
-            )
-        """)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS reservas (
+                    id SERIAL PRIMARY KEY,
+                    nombre TEXT,
+                    fecha TEXT
+                )
+            """)
 
-        cur.execute("SELECT * FROM reservas WHERE fecha = %s", (fecha,))
-        if cur.fetchone():
-            return "<h2 style='color:red;text-align:center;'>❌ Fecha ocupada</h2><a href='/reserva'>Volver</a>"
+            cur.execute("INSERT INTO reservas (nombre, fecha) VALUES (%s, %s)", (nombre, fecha))
 
-        cur.execute(
-            "INSERT INTO reservas (nombre, fecha) VALUES (%s, %s)",
-            (nombre, fecha)
-        )
+            conn.commit()
+            cur.close()
+            conn.close()
 
-        conn.commit()
-        cur.close()
-        conn.close()
+            return """
+            <h2 style='color:green;'>✅ Reserva confirmada</h2>
+            <a href="/">Volver</a><br><br>
+            <a href="https://wa.me/50689872394">Confirmar por WhatsApp</a>
+            """
 
-        return f"""
-        <h2 style='text-align:center;color:green;'>✅ Reserva confirmada</h2>
-        <div style='text-align:center;'>
-            <a href='https://wa.me/50689872394?text=Reserva%20{nombre}%20{fecha}'
-               style='background:#25D366;color:white;padding:15px;border-radius:10px;text-decoration:none;'>
-               📲 WhatsApp
-            </a>
-        </div>
-        """
+        except Exception as e:
+            return f"Error: {e}"
 
     return """
-    <html>
-    <body style="background:#111;color:white;text-align:center;font-family:Arial;">
-        <h1>Reservar</h1>
-
-        <form method="POST">
-            <input name="nombre" placeholder="Nombre" required><br><br>
-            <input name="fecha" type="date" required><br><br>
-            <button>Reservar</button>
-        </form>
-    </body>
-    </html>
+    <h1>Reservar</h1>
+    <form method="POST">
+        <input name="nombre" placeholder="Tu nombre"><br><br>
+        <input type="date" name="fecha"><br><br>
+        <button>Reservar</button>
+    </form>
     """
 
-# 🔐 LOGIN
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        user = request.form['user']
-        password = request.form['password']
 
-        if user == "admin" and password == "1234":
-            session['admin'] = True
-            return redirect('/admin')
-
-        return "<h3 style='color:red;'>Credenciales incorrectas</h3>"
-
-    return """
-    <html>
-    <body style="text-align:center;font-family:Arial;">
-        <h1>🔐 Login Admin</h1>
-
-        <form method="POST">
-            <input name="user" placeholder="Usuario"><br><br>
-            <input name="password" type="password" placeholder="Contraseña"><br><br>
-            <button>Entrar</button>
-        </form>
-    </body>
-    </html>
-    """
-
-# 📊 PANEL ADMIN
+# 📊 VER RESERVAS
 @app.route('/admin')
 def admin():
-    if not session.get('admin'):
-        return redirect('/login')
-
-    conn = get_db_connection()
+    conn = get_db()
     cur = conn.cursor()
 
-    cur.execute("SELECT id, nombre, fecha FROM reservas ORDER BY fecha")
-    reservas = cur.fetchall()
+    cur.execute("SELECT * FROM reservas")
+    data = cur.fetchall()
 
     cur.close()
     conn.close()
 
-    lista = ""
-    for r in reservas:
-        lista += f"""
-        <div style='background:#222;padding:15px;margin:10px;border-radius:10px;color:white;'>
-            <b>{r[1]}</b> - {r[2]}<br><br>
+    html = "<h1>Reservas</h1>"
 
-            <a href='/eliminar/{r[0]}' style='color:red;'>❌ Eliminar</a>
-        </div>
-        """
+    for r in data:
+        html += f"<p>{r[1]} - {r[2]}</p>"
 
-    return f"""
-    <html>
-    <body style="background:#111;color:white;text-align:center;font-family:Arial;">
-        <h1>📊 Panel Admin</h1>
+    return html
 
-        {lista if lista else "<p>No hay reservas</p>"}
 
-        <br>
-        <a href="/logout" style="color:#25D366;">Cerrar sesión</a>
-    </body>
-    </html>
-    """
-
-# 🗑️ ELIMINAR
-@app.route('/eliminar/<int:id>')
-def eliminar(id):
-    if not session.get('admin'):
-        return redirect('/login')
-
-    conn = get_db_connection()
-    cur = conn.cursor()
-
-    cur.execute("DELETE FROM reservas WHERE id = %s", (id,))
-    conn.commit()
-
-    cur.close()
-    conn.close()
-
-    return redirect('/admin')
-
-# 🚪 LOGOUT
-@app.route('/logout')
-def logout():
-    session.pop('admin', None)
-    return redirect('/')
-
-if __name__ == '__main__':
-    app.run(debug=True)
+if __name__ == "__main__":
+    app.run()
