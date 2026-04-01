@@ -1,20 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Panel Admin</title>
+    <title>Admin</title>
 </head>
-<body style="font-family:Arial; text-align:center;">
-
-    <h1>📊 Reservas</h1>
+<body>
+    <h1>Reservas</h1>
 
     <ul>
-        {% for id, nombre, fecha in reservas %}
-            <li>
-                {{ nombre }} - {{ fecha }}
-                <a href="/eliminar/{{ id }}">❌ Eliminar</a>
-            </li>
+        {% for r in reservas %}
+            <li>{{ r[0] }} - {{ r[1] }}</li>
         {% endfor %}
     </ul>
 
+    <a href="/">Volver</a>
 </body>
 </html>
