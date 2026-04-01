@@ -6,25 +6,31 @@ app = Flask(__name__)
 
 NUMERO_WHATSAPP = "50689872394"
 
-# 🔗 URL base de datos
+# 🔗 URL de la base de datos
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
-# Arreglar formato si viene viejo
+# Arreglar formato viejo
 if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
-# 🔌 Conexión
+
+# 🔌 Conexión a PostgreSQL
 def get_db_connection():
+    if not DATABASE_URL:
+        raise Exception("DATABASE_URL no está definida")
+
+    print("Conectando a:", DATABASE_URL)
+
     return psycopg2.connect(DATABASE_URL, sslmode='require')
 
 
-# 🏠 Inicio
+# 🏠 Página principal
 @app.route("/")
 def home():
     return render_template("index.html")
 
 
-# 📅 Reserva
+# 📅 Página de reserva
 @app.route("/reserva", methods=["GET", "POST"])
 def reserva():
     mensaje = ""
@@ -57,6 +63,8 @@ def reserva():
 
                 mensaje = "Reserva guardada correctamente"
                 link_whatsapp = f"https://wa.me/{NUMERO_WHATSAPP}?text=Hola soy {nombre} y quiero confirmar mi reserva para {fecha}"
+            else:
+                mensaje = "Faltan datos"
 
         cur.close()
         conn.close()
@@ -72,7 +80,7 @@ def reserva():
     )
 
 
-# 👀 Admin
+# 👀 Panel admin
 @app.route("/admin")
 def admin():
     try:
@@ -92,6 +100,6 @@ def admin():
     return render_template("admin.html", reservas=reservas)
 
 
-# 🚀 Render
+# 🚀 Ejecutar app
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
