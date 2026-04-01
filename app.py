@@ -1,105 +1,58 @@
-from flask import Flask, render_template, request
-import os
+from flask import Flask, request
 import psycopg2
+import os
 
 app = Flask(__name__)
 
-NUMERO_WHATSAPP = "50689872394"
+# IMPORTANTE: limpia espacios invisibles
+DATABASE_URL = os.getenv("DATABASE_URL").strip()
 
-# 🔗 URL de la base de datos
-DATABASE_URL = os.environ.get("DATABASE_URL")
-
-# Arreglar formato viejo
-if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-
-
-# 🔌 Conexión a PostgreSQL
 def get_db_connection():
-    if not DATABASE_URL:
-        raise Exception("DATABASE_URL no está definida")
-
-    print("Conectando a:", DATABASE_URL)
-
     return psycopg2.connect(DATABASE_URL, sslmode='require')
 
+@app.route('/')
+def index():
+    return "<h1>Bienvenido</h1><a href='/reserva'>Ir a reserva</a>"
 
-# 🏠 Página principal
-@app.route("/")
-def home():
-    return render_template("index.html")
-
-
-# 📅 Página de reserva
-@app.route("/reserva", methods=["GET", "POST"])
+@app.route('/reserva', methods=['GET', 'POST'])
 def reserva():
-    mensaje = ""
-    link_whatsapp = ""
+    if request.method == 'POST':
+        nombre = request.form['nombre']
+        fecha = request.form['fecha']
 
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
+        try:
+            conn = get_db_connection()
+            cur = conn.cursor()
 
-        # Crear tabla si no existe
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS reservas (
-                id SERIAL PRIMARY KEY,
-                nombre TEXT,
-                fecha TEXT
-            )
-        """)
-        conn.commit()
-
-        if request.method == "POST":
-            nombre = request.form.get("nombre", "")
-            fecha = request.form.get("fecha", "")
-
-            if nombre and fecha:
-                cur.execute(
-                    "INSERT INTO reservas (nombre, fecha) VALUES (%s, %s)",
-                    (nombre, fecha)
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS reservas (
+                    id SERIAL PRIMARY KEY,
+                    nombre TEXT,
+                    fecha DATE
                 )
-                conn.commit()
+            """)
 
-                mensaje = "Reserva guardada correctamente"
-                link_whatsapp = f"https://wa.me/{NUMERO_WHATSAPP}?text=Hola soy {nombre} y quiero confirmar mi reserva para {fecha}"
-            else:
-                mensaje = "Faltan datos"
+            cur.execute(
+                "INSERT INTO reservas (nombre, fecha) VALUES (%s, %s)",
+                (nombre, fecha)
+            )
 
-        cur.close()
-        conn.close()
+            conn.commit()
+            cur.close()
+            conn.close()
 
-    except Exception as e:
-        print("ERROR:", e)
-        mensaje = "Error al guardar la reserva"
+            return "Reserva guardada correctamente"
 
-    return render_template(
-        "reserva.html",
-        mensaje=mensaje,
-        link_whatsapp=link_whatsapp
-    )
+        except Exception as e:
+            return f"ERROR: {e}"
 
+    return """
+    <form method="POST">
+        Nombre: <input name="nombre"><br>
+        Fecha: <input name="fecha" type="date"><br>
+        <button type="submit">Guardar</button>
+    </form>
+    """
 
-# 👀 Panel admin
-@app.route("/admin")
-def admin():
-    try:
-        conn = get_db_connection()
-        cur = conn.cursor()
-
-        cur.execute("SELECT nombre, fecha FROM reservas ORDER BY fecha")
-        reservas = cur.fetchall()
-
-        cur.close()
-        conn.close()
-
-    except Exception as e:
-        print("ERROR ADMIN:", e)
-        reservas = []
-
-    return render_template("admin.html", reservas=reservas)
-
-
-# 🚀 Ejecutar app
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+if __name__ == '__main__':
+    app.run(debug=True)
