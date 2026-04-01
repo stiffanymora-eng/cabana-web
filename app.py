@@ -1,12 +1,27 @@
 from flask import Flask, render_template, request, redirect, url_for
+import sqlite3
 import os
 
 app = Flask(__name__)
 
 NUMERO_WHATSAPP = "50689872394"
-
-# 🔐 contraseña admin
 PASSWORD_ADMIN = "1234"
+
+# 📦 CREAR BASE DE DATOS
+def init_db():
+    conn = sqlite3.connect("reservas.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS reservas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nombre TEXT,
+            fecha TEXT
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+init_db()
 
 
 @app.route("/")
@@ -16,16 +31,14 @@ def home():
 
 @app.route("/reserva", methods=["GET", "POST"])
 def reserva():
-    fechas_ocupadas = set()
+    conn = sqlite3.connect("reservas.db")
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT fecha FROM reservas")
+    fechas_ocupadas = [row[0] for row in cursor.fetchall()]
+
     mensaje = ""
     link_whatsapp = ""
-
-    if os.path.exists("reservas.txt"):
-        with open("reservas.txt", "r") as archivo:
-            for linea in archivo:
-                partes = linea.strip().split(" - ")
-                if len(partes) == 2:
-                    fechas_ocupadas.add(partes[1])
 
     if request.method == "POST":
         nombre = request.form["nombre"]
@@ -34,13 +47,20 @@ def reserva():
         if fecha in fechas_ocupadas:
             mensaje = "Lo sentimos, esta fecha ya está reservada"
         else:
-            with open("reservas.txt", "a") as archivo:
-                archivo.write(f"{nombre} - {fecha}\n")
+            cursor.execute("INSERT INTO reservas (nombre, fecha) VALUES (?, ?)", (nombre, fecha))
+            conn.commit()
 
             mensaje = "Reserva guardada correctamente"
             link_whatsapp = f"https://wa.me/{NUMERO_WHATSAPP}?text=Hola soy {nombre} y quiero confirmar mi reserva para {fecha}"
 
-    return render_template("reserva.html", fechas=sorted(fechas_ocupadas), mensaje=mensaje, link_whatsapp=link_whatsapp)
+    conn.close()
+
+    return render_template(
+        "reserva.html",
+        fechas=fechas_ocupadas,
+        mensaje=mensaje,
+        link_whatsapp=link_whatsapp
+    )
 
 
 # 🔐 LOGIN ADMIN
@@ -49,9 +69,7 @@ def admin():
     error = ""
 
     if request.method == "POST":
-        password = request.form["password"]
-
-        if password == PASSWORD_ADMIN:
+        if request.form["password"] == PASSWORD_ADMIN:
             return redirect(url_for("panel"))
         else:
             error = "Contraseña incorrecta"
@@ -62,28 +80,26 @@ def admin():
 # 📊 PANEL ADMIN
 @app.route("/panel")
 def panel():
-    reservas = []
+    conn = sqlite3.connect("reservas.db")
+    cursor = conn.cursor()
 
-    if os.path.exists("reservas.txt"):
-        with open("reservas.txt", "r") as archivo:
-            for linea in archivo:
-                reservas.append(linea.strip())
+    cursor.execute("SELECT id, nombre, fecha FROM reservas")
+    reservas = cursor.fetchall()
+
+    conn.close()
 
     return render_template("admin.html", reservas=reservas)
 
 
-# 🗑️ ELIMINAR RESERVA
-@app.route("/eliminar/<int:index>")
-def eliminar(index):
-    if os.path.exists("reservas.txt"):
-        with open("reservas.txt", "r") as archivo:
-            lineas = archivo.readlines()
+# 🗑️ ELIMINAR
+@app.route("/eliminar/<int:id>")
+def eliminar(id):
+    conn = sqlite3.connect("reservas.db")
+    cursor = conn.cursor()
 
-        if 0 <= index < len(lineas):
-            lineas.pop(index)
-
-        with open("reservas.txt", "w") as archivo:
-            archivo.writelines(lineas)
+    cursor.execute("DELETE FROM reservas WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
 
     return redirect(url_for("panel"))
 
